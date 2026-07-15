@@ -2,6 +2,7 @@ import os
 import sys
 import re
 import tempfile
+import shutil
 from reportlab.lib.enums import TA_CENTER
 from rich.console import Console
 from rich.panel import Panel
@@ -190,17 +191,36 @@ def run_pipeline(job_id):
 
 def main():
     console.print(Panel(
-        f"[bold gold1]💼 SHIKHAR SINHA'S CAREER ENGINE & RECRUITER OUTBOUND[/bold gold1]\n"
+        f"[bold gold1]💼 JOB SCOUT CAREER ENGINE & RECRUITER OUTBOUND[/bold gold1]\n"
         f"[dim]Version 1.0 (CTO & CEO Executable Primitive)[/dim]",
         border_style="bold gold1",
         alignment=TA_CENTER
     ))
     
-    # Validate base files
-    base_resume = os.path.join("data", "resume_base.json")
+    # Auto-initialize directories and base template files if not present (off git fallback setup)
+    data_dir = "data"
+    os.makedirs(data_dir, exist_ok=True)
+    
+    base_resume = os.path.join(data_dir, "resume_base.json")
+    base_resume_example = os.path.join(data_dir, "resume_base.json.example")
+    
     if not os.path.exists(base_resume):
-        console.print("[bold red]Fatal Error: Master base resume data not found at data/resume_base.json.[/bold red]")
-        sys.exit(1)
+        if os.path.exists(base_resume_example):
+            console.print("[yellow]ℹ️ Initializing resume_base.json from example template...[/yellow]")
+            shutil.copy(base_resume_example, base_resume)
+            console.print("[green]✓ Created data/resume_base.json. Please edit this file with your own profile data.[/green]")
+        else:
+            console.print("[bold red]Fatal Error: Base resume data template not found at data/resume_base.json.[/bold red]")
+            sys.exit(1)
+            
+    job_listings_1_50 = os.path.join(data_dir, "job_listings_1_50.md")
+    job_listings_1_50_example = os.path.join(data_dir, "job_listings_1_50.md.example")
+    
+    if not os.path.exists(job_listings_1_50):
+        if os.path.exists(job_listings_1_50_example):
+            console.print("[yellow]ℹ️ Initializing job_listings_1_50.md from example template...[/yellow]")
+            shutil.copy(job_listings_1_50_example, job_listings_1_50)
+            console.print("[green]✓ Created data/job_listings_1_50.md. Please edit this file with your target jobs.[/green]")
         
     # Core operational menu
     console.print("[cyan]Menu:[/cyan]")
@@ -219,7 +239,7 @@ def main():
         run_pipeline(job_id)
         
     elif choice == 2:
-        output_pdf = os.path.join("output", "resumes", "Shikhar_Sinha_Master_Resume.pdf")
+        output_pdf = os.path.join("output", "resumes", "Master_Resume.pdf")
         console.print(f"[cyan]Compiling Master Base Resume PDF to: {output_pdf}[/cyan]")
         generate_pdf.build_pdf(base_resume, output_pdf)
         console.print("[green]✓ Master resume PDF completed successfully![/green]")
