@@ -32,6 +32,7 @@ mcp_config.json
 !mcp_config.json
 !data/*.example
 !data/email_playbook.md
+!data/email_strategies.json
 
 # Personal lists and ledgers
 *_ledger.md
@@ -57,6 +58,8 @@ data/filtered_job_listings_1_150.md
 data/filtered_recent_job_listings_1_150.md
 data/job_scout.db
 data/*.json
+!data/email_strategies.json
+
 
 # Exclude one-off scratch scripts
 scratch_*.py

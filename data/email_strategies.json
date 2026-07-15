@@ -1,0 +1,119 @@
+{
+  "archetypes": [
+    {
+      "id": "builder",
+      "name": "The Builder Response",
+      "description": "Used for founder or CXO posts that ask for builders to build from scratch with no formal JD.",
+      "tone": "Visionary, direct, collaborative, problem solver.",
+      "dynamic_title": "Growth & Product Operator",
+      "guidelines": [
+        "Open immediately by addressing one specific product or business challenge mentioned in their post.",
+        "Skip standard marketing templates and describe a concrete builder proposal or how you solved a similar system problem.",
+        "Integrate the portfolio link naturally as proof of your system builds.",
+        "End with a collaboration hook rather than an application sign off."
+      ],
+      "examples": [
+        {
+          "context": "Founder building a stealth D2C brand in the non apparel space looking for founding builders.",
+          "subject": "Founding Team Member — Growth and Product Builder",
+          "body": "Hi [Founder Name],\n\nI saw your post looking for founding builders to build a modern consumer brand in the men's non apparel space.\n\nI'm [Your Name], an AI native growth operator with 4+ years of experience, having managed 24+ brands.\n\nWhile most of my experience comes from D2C and B2B brands, the underlying growth principles remain identical: customer acquisition economics, conversion optimization, retention, experimentation, and attribution. After reading the job description, I am reaching out because my skill set aligns perfectly with this role.\n\nI am a systems first growth operator, combining media buying with backend database automations to scale D2C brands. Instead of standard acquisition funnels, I focus on building high converting viral loops like gamified WhatsApp referral waitlists to acquire customers at near zero cost. You can view my system builds and growth dashboards at https://shikhar-portfolio-marketing.vercel.app.\n\nLet's schedule a call soon to discuss your founding team launch goals.\n\nLooking forward to talking to you guys."
+        }
+      ]
+    },
+    {
+      "id": "operator",
+      "name": "The Operator Response",
+      "description": "Used for structured JDs, HR contacts, formal corporate settings, and clear skill lists.",
+      "tone": "Professional, metrics driven, execution focused.",
+      "dynamic_title": "AI Native Growth Operator",
+      "guidelines": [
+        "Tailor the second paragraph directly to the 2 or 3 most specific requirements in the JD.",
+        "Ensure metrics like ROAS or CAC reductions are framed in the context of their specific business goals.",
+        "Keep the structure clean, formal, and direct."
+      ],
+      "examples": [
+        {
+          "context": "Structured job description for a Performance Marketing Manager at a growth stage SaaS company.",
+          "subject": "Performance Marketing Manager Application — [Your Name]",
+          "body": "Hi [Hiring Manager Name],\n\nI am reaching out regarding the Performance Marketing Manager position at [Company Name] advertised on LinkedIn.\n\nI'm [Your Name], an AI native growth operator with 4+ years of experience, having managed 24+ brands.\n\nAfter reading the job description, I am reaching out because my skill set aligns perfectly with this role. I have extensive experience scaling multi-channel paid acquisition campaigns across Meta and Google while maintaining strict return on ad spend targets. I combine media buying with full funnel growth and conversion optimization to acquire customers profitably. My case studies and dashboard builds are documented in my portfolio at https://shikhar-portfolio-marketing.vercel.app.\n\nLet's schedule a call soon to discuss how I can help your team scale paid acquisition.\n\nLooking forward to talking to you guys."
+        }
+      ]
+    },
+    {
+      "id": "bridge",
+      "name": "The Cross-Industry Bridge",
+      "description": "Used when the target role is in an industry where you have less direct experience (e.g. Healthcare, EdTech, GovTech, FinTech).",
+      "tone": "Adaptable, analytical, strategic.",
+      "dynamic_title": "AI Native Growth Operator",
+      "guidelines": [
+        "Acknowledge the industry gap directly and immediately.",
+        "Pivot by explaining that growth mechanics (CAC, retention, attribution, CRO) are universal across sectors.",
+        "Cite an adjacent win in D2C or B2B and map its underlying system architecture to their industry's goals."
+      ],
+      "examples": [
+        {
+          "context": "Growth Marketer role at a Healthcare Tech company requiring healthcare industry background.",
+          "subject": "Growth Marketer — [Company Name]",
+          "body": "Hi [First Name],\n\nI saw your post looking for a Growth Marketer to lead user acquisition at [Company Name].\n\nI'm [Your Name], an AI native growth operator with 4+ years of experience, having managed 24+ brands.\n\nWhile most of my experience comes from D2C and B2B brands, the underlying growth principles remain identical: customer acquisition economics, conversion optimization, retention, experimentation, and attribution. After reading the job description, I am reaching out because my skill set aligns perfectly with this role.\n\nI focus on building growth systems that translate across industries. The same backend architectures I built to map user behavior and optimize conversion funnels for B2B brands apply directly to healthcare customer acquisition. You can view my systems and automation projects in my portfolio at https://shikhar-portfolio-marketing.vercel.app.\n\nLet's schedule a call soon to discuss your user acquisition goals.\n\nLooking forward to talking to you guys."
+        }
+      ]
+    },
+    {
+      "id": "challenger",
+      "name": "The Peer Challenger",
+      "description": "Used for founders or CXOs at growth stage companies where they describe a specific operational bottleneck.",
+      "tone": "Insightful, analytical, expert, authoritative.",
+      "dynamic_title": "Growth Systems Architect",
+      "guidelines": [
+        "Avoid listing your skills generically. Lead with a sharp, specific observation about their business or funnel.",
+        "Frame the email as a peer conversation rather than a traditional job application.",
+        "Provide 2 hyper specific observations or opportunities based on real data or best practices."
+      ],
+      "examples": [
+        {
+          "context": "Founder posting about scaling paid acquisition and facing attribution or retention challenges.",
+          "subject": "Funnel Optimization and Outbound Systems — [Company Name]",
+          "body": "Hi [First Name],\n\nI saw your post about the paid acquisition challenges you are scaling through at [Company Name].\n\nI'm [Your Name], an AI native growth operator with 4+ years of experience, having managed 24+ brands.\n\nI noticed you are actively scaling paid acquisition and building out your attribution infrastructure. I spent some time reviewing potential funnel opportunities and identified a few specific areas:\n• Implementing a server side tracking pipeline to capture post iOS14 attribution accurately across Meta and Google.\n• Deploying automated email flows triggered by funnel drop offs to capture lost leads without increasing ad spend.\nHappy to elaborate if useful.\n\nI build growth systems that optimize the entire funnel rather than just managing ad campaigns. You can check my case studies on attribution and database integrations at https://shikhar-portfolio-marketing.vercel.app.\n\nLet's schedule a call soon to discuss your scaling and attribution goals.\n\nLooking forward to talking to you guys."
+        }
+      ]
+    },
+    {
+      "id": "urgent",
+      "name": "The Urgent Applicant",
+      "description": "Used when the post highlights an immediate opening, contract role, or urgent hiring need.",
+      "tone": "Action oriented, concise, available, high energy.",
+      "dynamic_title": "AI Native Growth Operator",
+      "guidelines": [
+        "Acknowledge the immediate timeline in the very first sentence.",
+        "Keep the entire email body under 150 words.",
+        "Emphasize speed to deploy, immediate availability, and rapid execution."
+      ],
+      "examples": [
+        {
+          "context": "Post stating they need a growth contractor to start immediately next week.",
+          "subject": "Urgent Outbound Support — [Company Name]",
+          "body": "Hi [First Name],\n\nI saw your post about needing an immediate growth contractor to start next week at [Company Name].\n\nI'm [Your Name], an AI native growth operator with 4+ years of experience, having managed 24+ brands.\n\nAfter reading the job description, I am reaching out because my skill set aligns perfectly with this role. I have immediate availability to step in and manage your paid campaigns, setup custom dashboards, and integrate n8n automation flows. I can deploy and run campaigns within forty eight hours of access. My past performance dashboards and system integrations are live at https://shikhar-portfolio-marketing.vercel.app.\n\nLet's schedule a call soon to discuss your immediate launch requirements.\n\nLooking forward to talking to you guys."
+        }
+      ]
+    },
+    {
+      "id": "contrarian",
+      "name": "The Contrarian Opener",
+      "description": "Used for casual, unconventional, or visionary posts where the poster explicitly rejects standard resumes.",
+      "tone": "Unconventional, narrative, bold, raw.",
+      "dynamic_title": "AI Native Growth Operator",
+      "guidelines": [
+        "Do not start with 'I saw your post' or any standard application phrasing.",
+        "Open with a counterintuitive statement, an interesting question, or a very brief narrative hook.",
+        "Keep the tone conversational and direct, matching the style of a direct message."
+      ],
+      "examples": [
+        {
+          "context": "Founder post saying 'we do not care about resumes, show us what you have built'.",
+          "subject": "Building growth systems for [Company Name]",
+          "body": "Hi [First Name],\n\nMost resumes look exactly the same so I will skip the standard cover letter and tell you what I build instead.\n\nI'm [Your Name], an AI native growth operator with 4+ years of experience, having managed 24+ brands.\n\nI build growth systems that rewire underperforming funnels to drive real business metrics. I handle both marketing and martech, which means I write Python scripts, build custom APIs, and automate workflows instead of just running basic ad campaigns. You can see the actual systems, code bases, and performance results I have built at https://shikhar-portfolio-marketing.vercel.app.\n\nLet's schedule a call soon to discuss what you are building.\n\nLooking forward to talking to you guys."
+        }
+      ]
+    }
+  ]
+}

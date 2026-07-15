@@ -32,7 +32,11 @@ except ImportError:
 load_dotenv()
 
 FREE_KEY  = os.environ.get("GEMINI_API_KEY_FREE")
+if FREE_KEY:
+    FREE_KEY = FREE_KEY.strip('"').strip("'")
 PAID_KEY  = os.environ.get("GEMINI_API_KEY_PAID")
+if PAID_KEY:
+    PAID_KEY = PAID_KEY.strip('"').strip("'")
 if PAID_KEY == FREE_KEY:
     PAID_KEY = None
 

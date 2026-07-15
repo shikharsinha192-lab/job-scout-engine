@@ -3,18 +3,30 @@ import sys
 import smtplib
 import getpass
 import argparse
+import json
+import time
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from email.mime.application import MIMEApplication
 from dotenv import load_dotenv
 
+try:
+    from google import genai
+    from google.genai import types
+    has_modern_genai = True
+except ImportError:
+    import google.generativeai as genai
+    has_modern_genai = False
+
 load_dotenv()
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from scripts.gemini_client import generate_content_with_fallback, trim_prompt
+from scripts.gemini_client import generate_content_with_fallback, trim_prompt, FREE_KEY, PAID_KEY
 
 # Resolves correctly regardless of whether called from scripts/ or api/ directories
 _PLAYBOOK_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "data", "email_playbook.md")
+_STRATEGIES_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "data", "email_strategies.json")
+_RESUME_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "data", "resume_base.json")
 
 def _load_playbook():
     try:
@@ -24,67 +36,205 @@ def _load_playbook():
         print(f"[send_email] WARNING: Could not load email playbook from {_PLAYBOOK_PATH}: {e}")
         return ""
 
+def _load_strategies():
+    try:
+        with open(_STRATEGIES_PATH, 'r', encoding='utf-8') as f:
+            return json.load(f)
+    except Exception as e:
+        print(f"[send_email] WARNING: Could not load email strategies from {_STRATEGIES_PATH}: {e}")
+        return {"archetypes": []}
+
+def _load_base_resume():
+    try:
+        if os.path.exists(_RESUME_PATH):
+            with open(_RESUME_PATH, 'r', encoding='utf-8') as f:
+                return json.load(f)
+    except Exception as e:
+        print(f"[send_email] WARNING: Could not load base resume from {_RESUME_PATH}: {e}")
+    return {}
+
+def classify_and_extract_signals(raw_post_text):
+    prompt = f"""You are a professional recruiting coordinator. Analyze the following job post / JD / screenshot transcription and extract key signals for personalizing our outreach.
+
+JOB POST TEXT:
+\"\"\"
+{raw_post_text}
+\"\"\"
+
+Extract the following signals and format them as a valid JSON object:
+- post_type: Choose from [linkedin_founder, linkedin_hr, formal_jd, freelance_post, open_call]
+- poster_archetype: Choose from [founder, cxo, hr_recruiter, hiring_manager, agency]
+- company_stage: Choose from [idea, pre_seed, seed, series_a_b, growth, enterprise, unknown]
+- tone_of_post: Choose from [casual_and_conversational, formal_and_structured, visionary, urgent, ambiguous]
+- industry: Choose from [d2c, saas, fintech, edtech, health, ecommerce, cross_industry]
+- key_skills_wanted: List of main skills wanted (strings)
+- primary_challenge: A 1-sentence description of the main problem they want the candidate to solve
+- explicit_ask: What they literally asked candidates to do (e.g., "send email with resume", "DM me portfolio")
+- red_flags: List of any potential mismatches or strict requirements (e.g., years of experience required)
+- best_angle_of_attack: Choose the best strategy archetype from: [builder, operator, bridge, challenger, urgent, contrarian]
+
+Return ONLY a valid JSON object. Do not include markdown code block formatting.
+"""
+    try:
+        result = generate_content_with_fallback(prompt, response_mime_type="application/json")
+        if result.get("success"):
+            return json.loads(result["text"])
+    except Exception as e:
+        print(f"[send_email] WARNING: Signal extraction failed: {e}")
+    
+    # Fallback default signals
+    return {
+        "post_type": "formal_jd",
+        "poster_archetype": "hiring_manager",
+        "company_stage": "unknown",
+        "tone_of_post": "formal_and_structured",
+        "industry": "cross_industry",
+        "key_skills_wanted": [],
+        "primary_challenge": "Execute performance marketing and growth strategies.",
+        "explicit_ask": "send email with resume",
+        "red_flags": [],
+        "best_angle_of_attack": "operator"
+    }
+
+def get_company_insights_via_search(company_name, api_key, model_name="gemini-2.5-flash"):
+    prompt = f"""Search the web for current marketing and product signals for {company_name}.
+Focus on:
+1. What paid ad platforms are they active on (Meta, Google, LinkedIn)?
+2. What are the key visual style or hooks of their current ads?
+3. Are there any obvious bugs, friction points, or optimization opportunities on their website/landing pages?
+
+Summarize these into 2-3 bullet points of highly specific, actionable observations. Cite real data if found. Do not be generic.
+"""
+    try:
+        if has_modern_genai:
+            client = genai.Client(api_key=api_key)
+            resp = client.models.generate_content(
+                model=model_name,
+                contents=prompt,
+                config=types.GenerateContentConfig(
+                    tools=[{"google_search": {}}]
+                )
+            )
+            return resp.text.strip()
+        else:
+            genai.configure(api_key=api_key)
+            model = genai.GenerativeModel(model_name)
+            resp = model.generate_content(
+                prompt,
+                tools='google_search'
+            )
+            return resp.text.strip()
+    except Exception as e:
+        print(f"[send_email] WARNING: Search grounding failed for {company_name}: {e}")
+        return ""
+
 def draft_cold_email(recruiter_name, company_name, job_title, role_context="", skills_required="", why_relevant=""):
     """
-    Gemini-powered email drafter. Reads the playbook and adapts the email
-    specifically to the role, company, and context provided.
+    Gemini-powered strategist and email writer. Analyzes the job post context,
+    matches it to a strategic archetype, retrieves live company signals if needed,
+    and drafts a bespoke outreach email adhering strictly to universal rules.
     Returns (subject, body) tuple.
     """
+    # 1. Load context and config files
     playbook = _load_playbook()
+    strategies = _load_strategies()
+    base_resume = _load_base_resume()
     
-    # Handle unknown or missing company names gracefully
-    is_unknown_company = not company_name or company_name.strip() == "" or company_name.strip().lower() == "target company"
-    display_company = "your company" if is_unknown_company else company_name
+    candidate_name = base_resume.get("personal_info", {}).get("name", "Shikhar Sinha")
+    candidate_email = base_resume.get("personal_info", {}).get("email", "shikharsinha192@gmail.com")
+    candidate_linkedin = base_resume.get("personal_info", {}).get("linkedin", "https://www.linkedin.com/in/shikharsinha192/")
     
-    if recruiter_name and recruiter_name.strip() and recruiter_name.lower() not in ("hiring team", "hiring manager", "recruiter", "unknown"):
-        first_name = recruiter_name.split()[0]
-        salutation_hint = f"Hi {first_name},"
-    elif not is_unknown_company:
-        salutation_hint = f"Hi {display_company} Hiring Team,"
-    else:
-        salutation_hint = "Hi Hiring Team,"
+    # 2. Reconstruct raw post text for signal extractor
+    raw_post_text = f"Company: {company_name}\nJob Title: {job_title}\nRole Context/Pitch Hook: {role_context}\nSkills Required: {skills_required}\nWhy Relevant: {why_relevant}"
     
-    SIGNATURE = os.getenv("SENDER_SIGNATURE", "Your Name\nGrowth Marketing Strategist\nyour.email@example.com\nhttps://www.linkedin.com/in/yourprofile/")
-    STATS = os.getenv("SENDER_STATS", "I'm a growth marketer with 4+ years of experience, having managed 20+ brands.")
+    # 3. Stage 1: Extract Signals
+    signals = classify_and_extract_signals(raw_post_text)
+    strategy_id = signals.get("best_angle_of_attack", "operator")
+    
+    # Match strategic archetype
+    archetype_config = {}
+    for arch in strategies.get("archetypes", []):
+        if arch["id"] == strategy_id:
+            archetype_config = arch
+            break
+    if not archetype_config:
+        archetype_config = strategies.get("archetypes", [{}])[0]
+        
+    dynamic_title = archetype_config.get("dynamic_title", "AI Native Growth Operator")
+    
+    # 4. Stage 2: Sourced Insights if Challenger strategy triggered
+    search_insights = ""
+    if strategy_id == "challenger" and company_name and company_name.lower() != "target company":
+        print(f"[send_email] Challenger strategy selected. Sourcing web insights for {company_name}...")
+        api_key = FREE_KEY or PAID_KEY
+        if api_key:
+            search_insights = get_company_insights_via_search(company_name, api_key)
+            
+    # 5. Build mega-prompt for Strategist + Writer
+    prompt = f"""You are a master career coach and elite copywriter. You write highly conversion-focused cold outreach emails to hiring managers and founders.
 
-    role_type_hint = ""
-    title_lower = job_title.lower()
-    if any(k in title_lower for k in ("growth", "performance", "acquisition", "demand", "paid")):
-        role_type_hint = "Lead with CAC reduction, ROAS, paid + AI funnel ownership."
-    elif any(k in title_lower for k in ("content", "seo", "social")):
-        role_type_hint = "Lead with multi-brand content strategy, AI-assisted production."
-    elif any(k in title_lower for k in ("ai", "automation", "ops")):
-        role_type_hint = "Lead with AI systems built, martech stack, 60-80% time savings."
-    else:
-        role_type_hint = "Lead with full-stack marketing + martech ownership, 25+ brands."
+We are writing a cold email for the following candidate:
+- Name: {candidate_name}
+- Email: {candidate_email}
+- LinkedIn: {candidate_linkedin}
+- Target Introduction (Use this as the baseline second sentence): "I'm {candidate_name}, an AI native growth operator with 4+ years of experience, having managed 24+ brands."
 
-    prompt = f"""Draft a cold outreach email for Shikhar Sinha applying to {job_title} at {display_company}.
+We are targeting this job opportunity:
+- Company: {company_name}
+- Job Title: {job_title}
+- Context/Details:
+\"\"\"
+{raw_post_text}
+\"\"\"
 
-CANDIDATE STATS: {STATS}
-ROLE FOCUS: {role_type_hint}
-ROLE CONTEXT / PITCH HOOK: {role_context or 'Not specified'}
-SKILLS REQUIRED: {skills_required or 'Not specified'}
-WHY RELEVANT: {why_relevant or 'Not specified'}
+Here is the strategic analysis we performed on this post:
+- Post Type: {signals.get("post_type")}
+- Poster Archetype: {signals.get("poster_archetype")}
+- Company Stage: {signals.get("company_stage")}
+- Tone of Post: {signals.get("tone_of_post")}
+- Primary Challenge: {signals.get("primary_challenge")}
+- Best Angle of Attack: {archetype_config.get("name")}
+- Archetype Guidelines:
+{chr(10).join("  • " + g for g in archetype_config.get("guidelines", []))}
+"""
 
-STRICT RULES:
-- Greeting: Start with exactly {salutation_hint} or Hey/Hi [First Name],
-- First line: Must state exactly where you found the job post.
-- Second line (Intro): MUST say exactly "I'm Shikhar, an AI native growth marketer with 4+ years of experience, having managed 24+ brands."
-- CROSS-INDUSTRY RULE: If the job requires an industry Shikhar lacks (e.g., Healthcare), insert: "While most of my experience comes from D2C and B2B brands, the underlying growth principles remain identical: customer acquisition economics, conversion optimization, retention, experimentation, and attribution."
-- FOUNDER RULE: If emailing a Founder, replace the storytelling section with 2-3 bullet points of funnel teardowns: "I noticed you're actively scaling paid acquisition. I spent some time reviewing your recent funnel and identified a few highly specific opportunities:\n• [Stellar, hyper-specific insight 1 citing real/recent data]\n• [Stellar, hyper-specific insight 2 citing real/recent data]\nHappy to elaborate if useful." (DO NOT BE GENERIC. DO NOT HALLUCINATE NUMBERS. Use latest real data.)
-- Third line (Relevance): If NOT a Founder, MUST include a concise sentence expressing excitement because your background aligns perfectly with the JD.
-- Systems & Automation: If NOT a Founder, DO NOT invent stories... weave in these core truths smoothly: "systems first Growth Operator", "rewiring funnels", "combine media buying with AI led backend automation", "handle both marketing and martech". Validate with "up to 13x ROAS" and "20-50% CAC drop". Use smooth transitions.
-- Portfolio: Include and integrate the portfolio link (https://shikhar-portfolio-marketing.vercel.app) naturally woven into the body text.
-- Tone: Vary sentence lengths. Keep it sharp. No fluff words like "moreover".
-- End on an action note (e.g. "Let's schedule a call soon").
-- STRICTLY PROHIBITED: Do NOT use ANY dashes for punctuation. No em dashes (—), en dashes (–), or hyphens (-) for pauses. Use commas or periods.
-- STRICTLY PROHIBITED: No words like "moreover", "furthermore". No "see resume with deeper breakdowns". No "I hope this email finds you well"., NO "Please find attached", NO "see resume with deeper breakdowns"
-- Bullet points: Max 3, and only if absolutely necessary.
+    if search_insights:
+        prompt += f"""\nHere are live web observations about the company's current marketing/funnels:
+\"\"\"
+{search_insights}
+\"\"\"
+Use these observations to construct the hyper-specific insights for the email.
+"""
+
+    prompt += f"""
+Here is the email playbook of universal rules you MUST follow:
+\"\"\"
+{playbook}
+\"\"\"
+
+Here is a gold standard example of outreach for this archetype:
+- Context: {archetype_config.get("examples", [{}])[0].get("context")}
+- Subject: {archetype_config.get("examples", [{}])[0].get("subject")}
+- Body:
+{archetype_config.get("examples", [{}])[0].get("body")}
+
+Draft the email body and subject line.
+Ensure the signature title is exactly: "{dynamic_title}"
+Ensure the signature name is exactly: "{candidate_name}"
+Ensure the signature email is exactly: "{candidate_email}"
+Ensure the signature linkedin link is exactly: "{candidate_linkedin}"
+
+STRICT COMPLIANCE CHECK:
+- NO DASHES OF ANY KIND for punctuation (em dashes, en dashes, hyphens for pauses). Use commas or periods.
+- NO filler words (moreover, furthermore, thus, therefore).
+- NO resume references (e.g. do not say "attached resume").
+- NO greeting fluff (no "hope this email finds you well").
+- The signature block MUST match the format in the example exactly.
 
 OUTPUT FORMAT: Two sections split by the literal string ---SUBJECT--- on its own line.
-Section 1: Full email body (salutation + body + CTA + signature)
+Section 1: Full email body (salutation + body + signature)
 ---SUBJECT---
-Section 2: Subject line only (e.g. Growth Marketer - {display_company})
+Section 2: Subject line only
 """
 
     try:
@@ -99,7 +249,6 @@ Section 2: Subject line only (e.g. Growth Marketer - {display_company})
     # Strip markdown code fences Gemini may wrap the response in
     if raw.startswith("```"):
         lines = raw.splitlines()
-        # Remove first line (``` or ```text etc.) and last line (```)
         inner_lines = lines[1:] if len(lines) > 1 else lines
         if inner_lines and inner_lines[-1].strip() == "```":
             inner_lines = inner_lines[:-1]
@@ -109,33 +258,11 @@ Section 2: Subject line only (e.g. Growth Marketer - {display_company})
     if "---SUBJECT---" in raw:
         parts = raw.split("---SUBJECT---")
         body = parts[0].strip()
-        subject_company_suffix = f" at {display_company}" if not is_unknown_company else ""
-        subject = parts[1].strip() if len(parts) > 1 else f"Growth & Performance Marketing - {job_title}{subject_company_suffix}"
+        subject = parts[1].strip() if len(parts) > 1 else f"Outreach — {job_title}"
     else:
-        # Fallback: use raw as body, generate a safe subject
-        subject_company_suffix = f" at {display_company}" if not is_unknown_company else ""
-        body = raw if raw else f"""{salutation_hint}
-
-I noticed your opening for a {job_title} at {display_company} and wanted to reach out.
-
-I'm Shikhar, an AI native growth marketer with 4+ years of experience, having managed 24+ brands.
-
-After reading the job description, I am reaching out because my skill set aligns perfectly with this role.
-
-I am a systems first Growth Operator rewiring underperforming funnels to drive measurable P&L impact. I combine high intent media buying, retention, and full funnel growth with AI led backend automation, handling both marketing and martech. I build systems that acquire and retain customers profitably, using AI heavily to prototype ideas, generate creatives, and automate workflows so teams move 10x faster.
-
-You can see my case studies and portfolio at https://shikhar-portfolio-marketing.vercel.app.
-
-Let's schedule a call soon to discuss how I can help your team scale efficiently.
-
-Looking forward to talking to you guys.
-
-Thanks and regards,
-Shikhar Sinha
-Growth & Performance Marketing Strategist
-shikharsinha192@gmail.com
-https://www.linkedin.com/in/shikharsinha192/"""
-        subject = f"Growth & Performance Marketing - {job_title}{subject_company_suffix}"
+        # Fallback: generate a safe subject and body
+        subject = f"Outreach — {job_title}"
+        body = raw if raw else f"""Hi,\n\nI saw your post for the {job_title} role at {company_name}.\n\nI'm {candidate_name}, an AI native growth operator with 4+ years of experience, having managed 24+ brands.\n\nAfter reading the job description, I am reaching out because my skill set aligns perfectly with this role. My case studies and dashboard builds are documented in my portfolio at https://shikhar-portfolio-marketing.vercel.app.\n\nLet's schedule a call soon to discuss how I can help your team scale.\n\nLooking forward to talking to you guys.\n\nThanks and regards,\n{candidate_name}\n{dynamic_title}\n{candidate_email}\n{candidate_linkedin}"""
 
     # Hard enforce: strip all em dash variants and bare double-hyphen from both body and subject
     for field_ref in ["body", "subject"]:
