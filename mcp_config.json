@@ -1,0 +1,44 @@
+{
+  "hooks": [
+    {
+      "command": "/retrieve",
+      "description": "Trigger the Local Domain Data Retrieval skill",
+      "skill_path": ".agents/skills/domain-data.md"
+    },
+    {
+      "command": "/scout-linkedin",
+      "description": "Trigger the LinkedIn Apify scraper.",
+      "skill_path": ".agents/skills/scout-linkedin.md"
+    },
+    {
+      "command": "/scout-boards",
+      "description": "Trigger the Job Boards Apify scraper.",
+      "skill_path": ".agents/skills/scout-boards.md"
+    },
+    {
+      "command": "/scout-direct",
+      "description": "Trigger the Company Sites Apify scraper.",
+      "skill_path": ".agents/skills/scout-direct.md"
+    },
+    {
+      "command": "/scout-reddit",
+      "description": "Trigger the Reddit Apify scraper.",
+      "skill_path": ".agents/skills/scout-reddit.md"
+    },
+    {
+      "command": "/scout-x",
+      "description": "Trigger the X (Twitter) Apify scraper.",
+      "skill_path": ".agents/skills/scout-x.md"
+    },
+    {
+      "command": "/scout-meta",
+      "description": "Trigger the Meta Apify scraper.",
+      "skill_path": ".agents/skills/scout-meta.md"
+    },
+    {
+      "command": "/scout-all",
+      "description": "Trigger the Orchestrator to run multiple Apify scrapers sequentially.",
+      "skill_path": ".agents/skills/master-scout.md"
+    }
+  ]
+}

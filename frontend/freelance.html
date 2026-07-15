@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Opportunity Engine - Freelance Radar</title>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style-freelance.css">
+</head>
+<body>
+    <div id="scanline"></div>
+    
+    <nav class="pixel-nav">
+        <h1 class="logo">FREELANCE_RADAR_</h1>
+        <ul class="nav-links">
+            <li><a href="#" data-nav="dashboard" class="active">INBOX</a></li>
+            <li><a href="#" data-nav="scrape">SCAN</a></li>
+            <li><a href="#" data-nav="analytics">ANALYTICS</a></li>
+        </ul>
+    </nav>
+
+    <main id="app-container">
+        <!-- MODULE 1: DASHBOARD -->
+        <section id="module-dashboard" class="module active">
+            <div class="stats-strip" id="dashboard-stats">
+                <div class="stat-card">
+                    <div class="stat-val" id="stat-fresh">0</div>
+                    <div class="stat-label">FRESH SIGNALS</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-val" id="stat-high-intent">0</div>
+                    <div class="stat-label">HIGH INTENT</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-val" id="stat-contactable">0</div>
+                    <div class="stat-label">CONTACTABLE</div>
+                </div>
+                <div class="stat-card stat-card-gold">
+                    <div class="stat-val" id="stat-sent">0</div>
+                    <div class="stat-label">PITCHES SENT</div>
+                </div>
+            </div>
+
+            <div class="action-bar">
+                <button class="btn btn-primary" id="btn-load-json">[ RUN SCAN ]</button>
+                <div class="filter-group">
+                    <button class="btn btn-secondary filter-chip active" data-filter="all">ALL</button>
+                    <button class="btn btn-secondary filter-chip" data-filter="high-intent">HIGH INTENT</button>
+                    <button class="btn btn-secondary filter-chip" data-filter="freelance">FREELANCE</button>
+                </div>
+                <div class="toggle-group">
+                    <label>FRESHNESS:</label>
+                    <button class="btn btn-secondary toggle-btn active" data-days="3">3 DAYS</button>
+                    <button class="btn btn-secondary toggle-btn" data-days="7">7 DAYS</button>
+                </div>
+            </div>
+
+            <h2 class="section-title">TOP OPPORTUNITIES</h2>
+            <div class="opportunity-list" id="signal-list">
+                <div class="dim-text">Awaiting JSON payload... Click [LOAD LOCAL JSON] to fetch mock data.</div>
+            </div>
+        </section>
+
+        <!-- MODULE 2: SCRAPE (SCAN) -->
+        <section id="module-scrape" class="module">
+            <h2 class="section-title">MANUAL RADAR SCAN</h2>
+            <div class="stat-card">
+                <p>Run the Precision Opportunity-Intelligence Engine locally.</p>
+                <br>
+                <button class="btn btn-accent" id="btn-start-scan">[ INITIATE SCAN ]</button>
+            </div>
+            
+            <div class="live-log-panel hidden" id="live-log-panel">
+                <div class="log-header">
+                    <span class="pulse-icon scanning-pulse"></span> SYSTEM LOGS
+                </div>
+                <div class="log-content" id="log-content">
+                    <!-- Logs stream here -->
+                </div>
+            </div>
+        </section>
+
+        <!-- MODULE 3: ANALYTICS -->
+        <section id="module-analytics" class="module">
+            <h2 class="section-title">RADAR ANALYTICS</h2>
+            <div class="analytics-grid">
+                <div class="stat-card">
+                    <h3>PLATFORM BREAKDOWN</h3>
+                    <ul class="analytics-list" id="analytics-platform">
+                        <li>Loading...</li>
+                    </ul>
+                </div>
+                <div class="stat-card">
+                    <h3>OPPORTUNITY TRENDS</h3>
+                    <ul class="analytics-list" id="analytics-trends">
+                        <li>Loading...</li>
+                    </ul>
+                </div>
+                <div class="stat-card">
+                    <h3>CONVERSION RATE</h3>
+                    <div class="stat-val" id="analytics-conversion">0%</div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- OUTREACH MODAL (SEMI-MANUAL) -->
+    <div id="modal-outreach" class="modal-overlay hidden">
+        <div class="modal-content" style="width: 600px; max-width: 90vw;">
+            <h2>PITCH PRE-FLIGHT</h2>
+            <p id="outreach-target" style="margin-bottom: 15px; color: var(--accent-high);">Target | Platform</p>
+            
+            <div id="outreach-fields">
+                <div class="form-group">
+                    <label>CONTACT PATH</label>
+                    <input type="text" id="outreach-path" class="pixel-input" readonly>
+                </div>
+                
+                <div class="form-group">
+                    <label>PITCH / DM COPY</label>
+                    <textarea id="outreach-body" class="pixel-input" rows="8" style="resize: vertical; font-size: 10px; line-height: 1.4;"></textarea>
+                </div>
+            </div>
+
+            <div class="modal-actions" style="margin-top: 20px;">
+                <button class="btn btn-secondary" id="btn-cancel-outreach">CANCEL</button>
+                <button class="btn btn-primary" id="btn-send-outreach">[ EXECUTE OUTREACH ]</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- GLOBAL LOADER -->
+    <div id="global-loader" class="modal-overlay hidden">
+        <div class="loader-content">
+            <div class="pixel-spinner"></div>
+            <h2 id="loader-title">SCANNING...</h2>
+            <div id="loader-log" class="dim-text">>_ initiating heuristic filters</div>
+        </div>
+    </div>
+
+    <script src="freelance.js"></script>
+</body>
+</html>

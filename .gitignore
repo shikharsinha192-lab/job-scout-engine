@@ -1,0 +1,61 @@
+# Python environment
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+.venv/
+venv/
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Environment config & secrets
+.env
+credentials.json
+
+# Local MCP config
+mcp_config.json
+
+# User resumes (personal data)
+*.pdf
+
+# Ledgers and data databases (contains private tracking / company lists / leads)
+*.db
+*.db-journal
+*.sqlite
+*.sqlite3
+*.json
+*.jsonl
+!requirements.txt
+!package.json
+!mcp_config.json
+
+# Personal lists and ledgers
+*_ledger.md
+fresh_*_jobs.md
+uncontacted_*
+contacted_*
+
+# Local directories
+.agents/
+.cache/
+scratch/
+output/
+LINKEDINJOBS SCREENSHOTS/
+data/
+
+# Exclude one-off scratch scripts
+scratch_*.py
+send_lumn_email.py
+dispatch_top5_founders.py
+alter_db.py
+check_db.py
+check_inbox.py
+check_replies.py
+check_savesage.py
+check_bounces.py
+repair_resumes.py
+test_jd_scrape.py
+test_run.py
+read_transcript.py

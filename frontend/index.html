@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Job Scout Engine - Mission Control</title>
+    <!-- Google Font for Retro 90s Pixel -->
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div id="scanline"></div>
+    
+    <nav class="pixel-nav">
+        <h1 class="logo">JOB SCOUT ENG_</h1>
+        <ul class="nav-links">
+            <li><a href="#" data-nav="dashboard" class="active">DASHBOARD</a></li>
+            <li><a href="#" data-nav="scrape">SCRAPE</a></li>
+            <li><a href="#" data-nav="analytics">ANALYTICS</a></li>
+        </ul>
+    </nav>
+
+    <main id="app-container">
+        <!-- MODULE 1: DASHBOARD -->
+        <section id="module-dashboard" class="module active">
+            <div class="stats-strip" id="dashboard-stats">
+                <div class="stat-card">
+                    <div class="stat-val" id="stat-today">0</div>
+                    <div class="stat-label">NEW TODAY</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-val" id="stat-ready">0</div>
+                    <div class="stat-label">READY</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-val" id="stat-sent">0</div>
+                    <div class="stat-label">SENT (WK)</div>
+                </div>
+                <div class="stat-card stat-card-gold">
+                    <div class="stat-val" id="stat-positive">0</div>
+                    <div class="stat-label">POSITIVE</div>
+                </div>
+            </div>
+
+            <div class="action-bar">
+                <button class="btn btn-primary" id="btn-open-schedule">[ SCHEDULE NEXT BATCH ]</button>
+                <button class="btn btn-secondary" id="btn-nav-scrape">[ SCRAPE NEW OPPS ]</button>
+            </div>
+
+            <h2 class="section-title">DAILY RECOMMENDED BATCH</h2>
+            <div class="batch-actions">
+                <button class="btn btn-action" id="btn-approve-all">APPROVE ALL</button>
+                <button class="btn btn-accent" id="btn-launch-outreach">LAUNCH OUTREACH</button>
+                <button class="btn btn-secondary" id="btn-manual-queue" style="font-size: 8px;">[MANUAL QUEUE]</button>
+            </div>
+            
+            <div class="opportunity-list" id="daily-batch-list">
+                <!-- Dynamically populated -->
+                <div class="loading-text">Loading batch...</div>
+            </div>
+        </section>
+
+        <!-- MODULE 2: SCRAPE -->
+        <section id="module-scrape" class="module">
+            <h2 class="section-title">SCRAPE NEW OPPORTUNITIES</h2>
+            <div class="scrape-box">
+                <p>Enter natural language prompt for the scraping engine:</p>
+                <p class="dim-text">e.g. "Find remote AI automation jobs posted in the last week."</p>
+                <textarea id="scrape-prompt" rows="3" class="pixel-input" placeholder=">_"></textarea>
+                <button class="btn btn-primary" id="btn-start-scrape">[ START SEARCH ]</button>
+            </div>
+        </section>
+
+        <!-- MODULE 3: ANALYTICS -->
+        <section id="module-analytics" class="module">
+            <h2 class="section-title">COMMAND CENTER ANALYTICS</h2>
+            <div class="analytics-grid" id="analytics-content">
+                <div class="loading-text">Loading analytics...</div>
+            </div>
+        </section>
+    </main>
+
+    <!-- SCHEDULE BATCH MODAL -->
+    <div id="modal-schedule" class="modal-overlay hidden">
+        <div class="modal-content pixel-box">
+            <h2>SCHEDULE NEXT BATCH</h2>
+            <div class="form-group">
+                <label>OPPORTUNITY TYPE</label>
+                <select id="sched-type" class="pixel-input">
+                    <option value="AI">AI</option>
+                    <option value="Automation">Automation</option>
+                    <option value="Growth">Growth</option>
+                    <option value="Marketing">Marketing</option>
+                    <option value="Content">Content</option>
+                    <option value="Freelance">Freelance</option>
+                    <option value="Custom">Custom</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>BATCH SIZE</label>
+                <select id="sched-size" class="pixel-input">
+                    <option value="5">5</option>
+                    <option value="10">10</option>
+                    <option value="15" selected>15</option>
+                    <option value="25">25</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>FRESHNESS FILTER</label>
+                <select id="sched-freshness" class="pixel-input">
+                    <option value="3">3 days</option>
+                    <option value="7" selected>7 days</option>
+                    <option value="10">10 days</option>
+                </select>
+            </div>
+            <div class="modal-actions">
+                <button class="btn btn-secondary" id="btn-close-schedule">CANCEL</button>
+                <button class="btn btn-primary" id="btn-generate-batch">[ GENERATE BATCH ]</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- OUTREACH MODAL (SEMI-MANUAL) -->
+    <div id="modal-outreach" class="modal-overlay hidden">
+        <div class="modal-content pixel-box" style="width: 600px; max-width: 90vw;">
+            <h2>PRE-FLIGHT REVIEW</h2>
+            <p id="outreach-company" style="margin-bottom: 15px; color: var(--accent);">Company | Title</p>
+            
+            <div id="outreach-loader" class="hidden" style="margin-bottom: 15px; color: yellow;">
+                [ Generating tailored draft & PDF... ]
+            </div>
+
+            <div id="outreach-fields">
+                <div id="manual-email-row" class="form-group hidden" style="background: rgba(255,0,0,0.1); padding: 8px; margin-bottom: 10px; border: 1px solid red;">
+                    <label style="color: red;">EMAIL NOT FOUND -- ENTER MANUALLY</label>
+                    <input type="text" id="outreach-manual-email" class="pixel-input" placeholder="recruiter@company.com">
+                </div>
+                <div class="form-group" style="display: flex; gap: 10px;">
+                    <div style="flex: 1;">
+                        <label>TO EMAIL (auto-found)</label>
+                        <input type="text" id="outreach-email" class="pixel-input">
+                    </div>
+                    <div style="flex: 1;">
+                        <label>RECRUITER NAME</label>
+                        <input type="text" id="outreach-name" class="pixel-input" placeholder="(optional)">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>SUBJECT</label>
+                    <input type="text" id="outreach-subject" class="pixel-input">
+                </div>
+                
+                <div class="form-group">
+                    <label>EMAIL BODY</label>
+                    <textarea id="outreach-body" class="pixel-input" rows="10" style="resize: vertical; font-size: 10px; line-height: 1.4;"></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label>ATTACHMENT</label>
+                    <div id="outreach-resume" class="badge-med" style="display: inline-block;">resume.pdf</div>
+                </div>
+            </div>
+
+            <div class="modal-actions" style="margin-top: 20px;">
+                <button class="btn btn-secondary" id="btn-skip-outreach">SKIP</button>
+                <button class="btn btn-accent" id="btn-send-outreach">[ SEND EMAIL ]</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- GLOBAL LOADER -->
+    <div id="global-loader" class="modal-overlay hidden">
+        <div class="loader-content">
+            <div class="pixel-spinner"></div>
+            <h2 id="loader-title">WORKING...</h2>
+            <div id="loader-log" class="log-line">>_ initializing</div>
+        </div>
+    </div>
+
+    <script src="/static/app.js"></script>
+</body>
+</html>
