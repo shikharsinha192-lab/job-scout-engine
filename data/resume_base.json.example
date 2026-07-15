@@ -1,0 +1,40 @@
+{
+  "personal_info": {
+    "name": "YOUR NAME",
+    "title": "Your Professional Title",
+    "phone": "+1 555-0199",
+    "email": "your.email@example.com",
+    "linkedin": "your-linkedin-slug",
+    "location": "City, Country"
+  },
+  "summary": "A brief summary of your professional background, skills, and areas of expertise.",
+  "work_experience": [
+    {
+      "role": "Job Title",
+      "company": "Company Name",
+      "location": "Location",
+      "start_date": "Start Date",
+      "end_date": "End Date",
+      "description": "Brief description of the role.",
+      "bullets": [
+        "Key achievement or responsibility with metrics (e.g., increased revenue by 20%)",
+        "Another achievement showcasing your skills and experience"
+      ]
+    }
+  ],
+  "education": [
+    {
+      "degree": "Degree Name",
+      "major": "Major Field of Study",
+      "institution": "University/School Name",
+      "location": "Location",
+      "start_date": "Start Date",
+      "end_date": "End Date"
+    }
+  ],
+  "skills": {
+    "languages": ["Python", "JavaScript"],
+    "frameworks": ["Django", "React"],
+    "tools": ["Git", "Docker"]
+  }
+}

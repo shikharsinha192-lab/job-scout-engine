@@ -30,6 +30,8 @@ mcp_config.json
 !requirements.txt
 !package.json
 !mcp_config.json
+!data/*.example
+!data/email_playbook.md
 
 # Personal lists and ledgers
 *_ledger.md
@@ -43,7 +45,18 @@ contacted_*
 scratch/
 output/
 LINKEDINJOBS SCREENSHOTS/
-data/
+
+# Personal data files inside data/
+data/campaigns/
+data/outreach_drafts/
+data/reports/
+data/resume_base.json
+data/job_listings_1_50.md
+data/job_listings_51_150.md
+data/filtered_job_listings_1_150.md
+data/filtered_recent_job_listings_1_150.md
+data/job_scout.db
+data/*.json
 
 # Exclude one-off scratch scripts
 scratch_*.py
