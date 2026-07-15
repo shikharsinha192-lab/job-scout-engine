@@ -1,16 +1,39 @@
 # 💼 Job Scout & Autonomous Recruiter Outbound Engine
 
-An autonomous, local, high-leverage recruitment and outbound pipeline designed to manage, evaluate, and execute targeted career outreach to startups and tech companies.
+<p align="center">
+  <img src="https://img.shields.io/github/license/shikharsinha192-lab/job-scout-engine?style=for-the-badge&color=blue" alt="License" />
+  <img src="https://img.shields.io/github/stars/shikharsinha192-lab/job-scout-engine?style=for-the-badge&color=gold" alt="Stars" />
+  <img src="https://img.shields.io/github/issues/shikharsinha192-lab/job-scout-engine?style=for-the-badge&color=red" alt="Issues" />
+  <img src="https://img.shields.io/badge/PRs-WELCOME-brightgreen?style=for-the-badge" alt="PRs Welcome" />
+</p>
+
+An autonomous, local, high-leverage recruitment and outbound pipeline designed to manage, evaluate, and execute targeted career outreach to tech companies.
+
+---
+
+## 🎯 System Architecture
+
+```mermaid
+graph TD
+    A["Job Listings (data/)"] --> B["Orchestrator CLI (main.py)"]
+    C["Web UI (frontend/)"] --> D["API Server (api/)"]
+    B --> E["AI Resume Tailor (scripts/tailor_resume.py)"]
+    D --> E
+    E --> F["PDF Compiler (scripts/generate_pdf.py)"]
+    F --> G["Outbox Dispatcher (scripts/send_email.py)"]
+    H["OSINT Hunter (scripts/email_harvester.py)"] --> G
+```
 
 ---
 
 ## 🚀 Key Features
 
-*   **Autonomous Job Evaluation**: Rule-based and AI-powered scoring of job descriptions against a candidate profile to determine relevance and legitimacy.
-*   **Gemini-Powered Resume Tailoring**: Automatically optimizes resume keywords and experience descriptions for specific job descriptions while preserving absolute metric integrity.
-*   **Local PDF Compilation**: reportlab-powered resume compiler that dynamically constructs a premium, single-page, ATS-optimized PDF resume.
-*   **OSINT Recruiter Hunting**: Generates targeted Google dorking queries and utilizes snov.io / email harvester scripts to locate verified decision-maker emails.
-*   **SMTP Outbound Dispatch**: Integrates secure SMTP mail delivery with attachment handling and pacing controls to protect sender reputation.
+*   **⚡ Autonomous Job Sourcing**: Automatically scrapes and discovers new listings using Apify and RSS feeds.
+*   **🎯 AI-Powered Resume Tailoring**: Leverages Gemini models to align resume experience and keywords with job descriptions dynamically.
+*   **📄 ReportLab PDF Compiler**: Creates single-page, ATS-optimized resumes locally without external document-generation services.
+*   **🔍 Recruiter OSINT Finder**: Automates Google dorking queries and integrates snov.io APIs to pinpoint hiring manager emails.
+*   **✉️ SMTP Outreach Dispatch**: Connects directly to secure email servers with rate-limiting protection to send cover emails with tailored PDF attachments.
+*   **📊 Interactive Web Dashboard**: Includes a fully responsive local web dashboard to review scraped opportunities, score relevance, and execute outreach.
 
 ---
 
